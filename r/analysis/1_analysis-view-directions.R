@@ -2,10 +2,10 @@ library(dplyr)
 library(ggplot2)
 library(tidyr)
 
-dat <- read.csv("data/Tidy/2021-05_Abrolhos_BOSS_random-points_broad.habitat.csv") %>%
-  select(-c(mean.relief, sd.relief)) %>%
+dat <- read.csv("data/tidy/2022_boss-habitat-paper_broad.habitat.csv") %>%
   dplyr::rename(points.annotated = "broad.total.points.annotated") %>%
-  # pivot_longer(names_to = "habitat", values_to = "count", cols = starts_with("broad")) %>%
+  dplyr::filter(location %in% "Abrolhos") %>% # Change here to add more locations
+  dplyr::select(-c(campaignid, date, site, location, successful.count)) %>%
   glimpse()
 
 fourdir <- dat %>%
@@ -48,7 +48,8 @@ full.dat <- bind_rows(fourdir,threedir,twodir,onedir) %>%
   select(sample, points.annotated, habitat, count, no.dir) %>%
   glimpse()
 
-p1 <- ggplot(data = full.dat%>%filter(sample%in%"npz6.2"), aes(fill = habitat, x = no.dir, y = count)) + geom_bar(position = "fill", stat = "identity")
+p1 <- ggplot(data = full.dat%>%filter(sample%in%"npz6.2"), aes(fill = habitat, x = no.dir, y = count)) + 
+  geom_bar(position = "fill", stat = "identity")
 
 p1
 
