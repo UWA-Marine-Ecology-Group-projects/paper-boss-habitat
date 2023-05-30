@@ -171,6 +171,21 @@ broad.points <- points %>%
   ga.clean.names() %>%
   dplyr::mutate(broad.black.octocorals = broad.black.octocorals + broad.octocoral.black,
                 broad.invertebrate.complex = broad.invertebrate.complex + broad.matrix) %>%
+  dplyr::select(-c(broad.octocoral.black, broad.matrix)) %>%
+  glimpse
+
+detailed.points <- points %>%
+  dplyr::filter(!broad %in% c("",NA,"Unknown","Open.Water","Open Water")) %>%
+  dplyr::mutate(detailed = paste("detailed",broad, morphology, type,sep = ".")) %>%
+  dplyr::mutate(count = 1) %>%
+  dplyr::group_by(sample) %>%
+  tidyr::spread(key = detailed, value = count, fill = 0) %>%
+  dplyr::select(-c(image.row,image.col, broad, morphology, type)) %>%
+  dplyr::group_by(sample, campaignid, direction) %>%
+  dplyr::summarise_all(funs(sum)) %>%
+  ungroup() %>%
+  dplyr::mutate(broad.total.points.annotated = rowSums(.[,4:(ncol(.))],na.rm = TRUE )) %>%
+  # ga.clean.names() %>%
   glimpse
 
 # Write final habitat data----
@@ -178,9 +193,13 @@ habitat.broad.points <- broad.points %>%
   left_join(metadata, by = c("sample", "campaignid")) %>%
   glimpse()
 
+habitat.detailed.points <- detailed.points %>%
+  left_join(metadata, by = c("sample", "campaignid")) %>%
+  glimpse()
+
 test <- habitat.broad.points %>%
   dplyr::group_by(campaignid, sample) %>%
   dplyr::summarise(n = n()) # 5 samples only have 3 directions
 
-write.csv(habitat.broad.points,file=paste("data/tidy", paste(study,"broad.habitat.csv",sep = "_"), sep = "/"), row.names=FALSE)
-
+write.csv(habitat.broad.points,file = paste("data/tidy", paste(study,"broad.habitat.csv",sep = "_"), sep = "/"), row.names=FALSE)
+write.csv(habitat.detailed.points,file = paste("data/tidy", paste(study,"detailed.habitat.csv",sep = "_"), sep = "/"), row.names=FALSE)
