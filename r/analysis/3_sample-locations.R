@@ -32,6 +32,15 @@ dat <- read.csv(paste("data/tidy", paste(study,"detailed.habitat.csv",
 wgscrs <- "+proj=longlat +datum=WGS84"
 gdacrs <- "+proj=longlat +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +no_defs"
 
+dat.sf <- dat %>%
+  st_as_sf(coords = c("longitude", "latitude"), crs = wgscrs) %>%
+  group_by(location) %>%
+  dplyr::summarise() %>%
+  st_cast("POLYGON") %>%
+  st_convex_hull() %>%
+  st_buffer(dist = 0.05)
+  
+plot(dat.sf)
 # Set cropping extent - larger than most zoomed out plot
 e <- ext(112, 147, -42, -26)
 
@@ -83,17 +92,18 @@ p4 <- ggplot() +
   # scale_fill_grey(start = 1, end = 0.5 , guide = "none") +
   geom_sf(data = ausc, fill = "seashell2", colour = "grey80", size = 0.1) +
   new_scale_fill() +  
-  geom_sf(data = mpa, aes(fill = ZoneName), alpha = 3/5, colour = NA) +
+  geom_sf(data = mpa, aes(fill = ZoneName), alpha = 0.25, colour = NA) +
   nmpa_fills +
   labs(x = NULL, y = NULL, fill = "Australian Marine Parks") +
   new_scale_fill() +
   # geom_contour(data = bathy, aes(x = x, y = y, z = Z), 
   #              breaks = c(0, -30, -70, -200, - 700, - 9000), colour = "white", alpha = 1, size = 0.2) +
   geom_sf(data = cwatr, colour = "firebrick", alpha = 4/5, size = 0.2) +
+  geom_sf(data = dat.sf, aes(fill = location), alpha = 0.7, size = 5, colour = "black") + 
   geom_point(data = dat, aes(longitude, latitude),
-             alpha = 0.5, size = 0.5) +
-  labs(colour = "Sample", x = NULL, y = NULL) +
-  coord_sf() +                                                                  # Change here
+             alpha = 1, size = 0.001, colour = "grey20") +
+  labs(x = NULL, y = NULL) +
+  coord_sf(xlim = c(113, 145), ylim = c(-41, -27)) +                                                                  # Change here
   theme_minimal()
 
 png(filename = paste0("plots/", study, "_sample-locations.png"), 
