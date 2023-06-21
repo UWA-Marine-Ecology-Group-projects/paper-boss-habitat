@@ -63,7 +63,28 @@ bremer <- read.csv("data/raw/2022-12_Bremer_stereo-BOSS_Metadata.csv") %>%
   dplyr::mutate(sample = ifelse(sample %in% "Brc1 ", "Brc1", sample)) %>%
   glimpse() # preview
 
-metadata <- bind_rows(abrolhos, geographe, swc, daw, bremer) %>%
+zeehan <- read.csv("data/raw/202205_ZEEHAN_AMP_BOSS_Metadata.csv") %>%
+  ga.clean.names() %>%
+  dplyr::select(period, latitude, longitude, date, site, location, successful.count) %>%
+  dplyr::rename(sample = period) %>%
+  dplyr::mutate(sample = as.character(sample),
+                date = as.character(date),
+                campaignid = "202205_ZEEHAN_AMP_BOSS",
+                location = "Zeehan") %>%
+  glimpse()
+
+franklin <- read.csv("data/raw/202204_FranklinAMP_BOSS_Metadata.csv") %>%
+  ga.clean.names() %>%
+  dplyr::select(period, latitude, longitude, date, site, location, successful.count) %>%
+  dplyr::rename(sample = period) %>%
+  dplyr::mutate(sample = as.character(sample),
+                date = as.character(date),
+                campaignid = "202204_FranklinAMP_BOSS",
+                location = "Franklin") %>%
+  glimpse()
+  
+
+metadata <- bind_rows(abrolhos, geographe, swc, daw, bremer, zeehan, franklin) %>%
   glimpse()
 
 names(metadata)
@@ -146,9 +167,56 @@ bremer.points <- read.delim("data/raw/2022-12_Bremer_stereo-BOSS_Dot Point Measu
                                                     ifelse(broad %in% "Cnidaria" & morphology %in% "Black & Octocorals", "Black & Octocorals", broad)))))) %>%
   glimpse() # preview
 
-unique(bremer.points$broad)
+zeehan.points <- read.csv("data/raw/202205_ZEEHAN_AMP_BOSS_Habitat_Dot Point Measurements.csv") %>%
+  ga.clean.names() %>% # tidy the column names using GlobalArchive function
+  mutate(sample = str_replace_all(filename, ".jpg", ""),
+         campaignid = "202205_ZEEHAN_AMP_BOSS") %>% 
+  select(sample,campaignid,image.row,image.col, c1, c2, c3) %>% # select only these columns to keep
+  dplyr::mutate(direction = ifelse(image.row < 1080 & image.col < 1920, "N", 
+                                   ifelse(image.row < 1080 & image.col >= 1920, "E", 
+                                          ifelse(image.row >= 1080 & image.col >= 1920, "S", "W")))) %>% 
+  dplyr::select(sample, campaignid, direction, everything()) %>%
+  dplyr::rename(broad = c1, morphology = c2, type = c3) %>%
+  separate(broad, into = c("broad", "broad.extra"), sep = " > ") %>%
+  dplyr::mutate(broad = ifelse(broad %in% "Substrate" & broad.extra %in% "Unconsolidated (soft)", "Unconsolidated",
+                               ifelse(broad %in% "Substrate" & broad.extra %in% "Consolidated (hard)", "Consolidated",
+                                      ifelse(broad %in% "Cnidaria" & broad.extra %in% "Hydroids", "Hydroids", 
+                                             ifelse(broad %in% "Cnidaria" & morphology %in% "Stony corals", "Stony corals",
+                                                    ifelse(broad %in% "Cnidaria" & morphology %in% "Black & Octocorals", "Black & Octocorals", broad)))))) %>%
+  glimpse() # preview
 
-points <- bind_rows(abrolhos.points, geo.points, swc.points, daw.points, bremer.points) %>%
+test <- zeehan.points %>%
+  dplyr::select(-c(morphology, type)) %>%
+  group_by(across()) %>%
+  filter(n() > 1) %>%
+  ungroup()
+
+franklin.points <- read.csv("data/raw/Franklin_202204_Habitat_Dot Point Measurements.csv") %>%
+  ga.clean.names() %>% # tidy the column names using GlobalArchive function
+  mutate(sample = str_replace_all(filename, ".jpg", ""),
+         campaignid = "202204_FranklinAMP_BOSS") %>% 
+  select(sample,campaignid,image.row,image.col, c1, c2, c3) %>% # select only these columns to keep
+  dplyr::mutate(direction = ifelse(image.row < 1080 & image.col < 1920, "N", 
+                                   ifelse(image.row < 1080 & image.col >= 1920, "E", 
+                                          ifelse(image.row >= 1080 & image.col >= 1920, "S", "W")))) %>% 
+  dplyr::select(sample, campaignid, direction, everything()) %>%
+  dplyr::rename(broad = c1, morphology = c2, type = c3) %>%
+  separate(broad, into = c("broad", "broad.extra"), sep = " > ") %>%
+  dplyr::mutate(broad = ifelse(broad %in% "Substrate" & broad.extra %in% "Unconsolidated (soft)", "Unconsolidated",
+                               ifelse(broad %in% "Substrate" & broad.extra %in% "Consolidated (hard)", "Consolidated",
+                                      ifelse(broad %in% "Cnidaria" & broad.extra %in% "Hydroids", "Hydroids", 
+                                             ifelse(broad %in% "Cnidaria" & morphology %in% "Stony corals", "Stony corals",
+                                                    ifelse(broad %in% "Cnidaria" & morphology %in% "Black & Octocorals", "Black & Octocorals", broad)))))) %>%
+  glimpse() # preview
+
+test <- franklin.points %>%
+  dplyr::select(-c(morphology, type)) %>%
+  group_by(across()) %>%
+  filter(n() > 1) %>%
+  ungroup()
+
+points <- bind_rows(abrolhos.points, geo.points, swc.points, daw.points, 
+                    bremer.points, franklin.points, zeehan.points) %>%
   dplyr::select(-broad.extra) %>%
   dplyr::filter(!broad %in% c("", "Unscorable", "Open Water", "Unknown")) %>%
   glimpse()
@@ -162,6 +230,7 @@ broad.points <- points %>%
   dplyr::mutate(broad = paste("broad",broad,sep = ".")) %>%
   dplyr::mutate(count = 1) %>%
   dplyr::group_by(sample) %>%
+  distinct() %>%
   tidyr::spread(key = broad, value = count, fill = 0) %>%
   dplyr::select(-c(image.row,image.col)) %>%
   dplyr::group_by(sample, campaignid, direction) %>%
@@ -179,6 +248,7 @@ detailed.points <- points %>%
   dplyr::mutate(detailed = paste("detailed",broad, morphology, type,sep = ".")) %>%
   dplyr::mutate(count = 1) %>%
   dplyr::group_by(sample) %>%
+  distinct() %>%
   tidyr::spread(key = detailed, value = count, fill = 0) %>%
   dplyr::select(-c(image.row,image.col, broad, morphology, type)) %>%
   dplyr::group_by(sample, campaignid, direction) %>%
@@ -199,7 +269,7 @@ habitat.detailed.points <- detailed.points %>%
 
 test <- habitat.broad.points %>%
   dplyr::group_by(campaignid, sample) %>%
-  dplyr::summarise(n = n()) # 5 samples only have 3 directions
+  dplyr::summarise(n = n()) # Loads of tassie ones missing directions
 
 write.csv(habitat.broad.points,file = paste("data/tidy", paste(study,"broad.habitat.csv",sep = "_"), sep = "/"), row.names=FALSE)
 write.csv(habitat.detailed.points,file = paste("data/tidy", paste(study,"detailed.habitat.csv",sep = "_"), sep = "/"), row.names=FALSE)
