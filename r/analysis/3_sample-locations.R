@@ -20,7 +20,7 @@ library(ggnewscale)
 study <- "drop-camera-paper" 
 
 # Load in sampling locations
-dat <- read.csv(paste("data/tidy", paste(study,"detailed.habitat.csv",
+met <- read.csv(paste("data/tidy", paste(study,"detailed.habitat.csv",
                                          sep = "_"), sep = "/")) %>%
   dplyr::mutate(location = recode(location, 
                                   "Esperance" = "Eastern Recherche")) %>%
@@ -32,7 +32,7 @@ dat <- read.csv(paste("data/tidy", paste(study,"detailed.habitat.csv",
 wgscrs <- "+proj=longlat +datum=WGS84"
 gdacrs <- "+proj=longlat +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +no_defs"
 
-dat.sf <- dat %>%
+dat.sf <- met %>%
   st_as_sf(coords = c("longitude", "latitude"), crs = wgscrs) %>%
   group_by(location) %>%
   dplyr::summarise() %>%
