@@ -159,7 +159,7 @@ p4 <- ggplot() +
   nmpa_fills +
   labs(x = NULL, y = NULL, fill = "Australian Marine Parks") +
   new_scale_fill() +
-  geom_sf(data = cwatr, colour = "firebrick", alpha = 4/5, size = 0.2) +
+  # geom_sf(data = cwatr, colour = "firebrick", alpha = 4/5, size = 0.2) +
   geom_sf(data = dat.sf, aes(fill = location), alpha = 0.7, size = 0.1, colour = "black") + 
   scale_fill_brewer(palette = "Dark2") +
   # geom_point(data = dat, aes(longitude, latitude),

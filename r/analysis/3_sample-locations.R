@@ -98,9 +98,9 @@ p4 <- ggplot() +
   new_scale_fill() +
   # geom_contour(data = bathy, aes(x = x, y = y, z = Z), 
   #              breaks = c(0, -30, -70, -200, - 700, - 9000), colour = "white", alpha = 1, size = 0.2) +
-  geom_sf(data = cwatr, colour = "firebrick", alpha = 4/5, size = 0.2) +
+  # geom_sf(data = cwatr, colour = "firebrick", alpha = 4/5, size = 0.2) +
   geom_sf(data = dat.sf, aes(fill = location), alpha = 0.7, size = 5, colour = "black") + 
-  geom_point(data = dat, aes(longitude, latitude),
+  geom_point(data = met, aes(longitude, latitude),
              alpha = 1, size = 0.001, colour = "grey20") +
   labs(x = NULL, y = NULL) +
   coord_sf(xlim = c(113, 145), ylim = c(-41, -27)) +                                                                  # Change here
