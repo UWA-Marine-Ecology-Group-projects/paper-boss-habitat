@@ -1,10 +1,10 @@
 # Clear memory ----
-rm(list=ls())
+rm(list = ls())
 
 # Libraries required ----
 # To connect to GlobalArchive
 library(devtools)
-library(GlobalArchive)
+library(CheckEM)
 
 # To tidy data
 library(tidyverse)
@@ -15,8 +15,8 @@ study <- "drop-camera-paper"
 
 # Read in the metadata----
 geographe <- read.csv("data/raw/2021-03_Geographe_BOSS_Metadata.csv") %>%
-  ga.clean.names() %>% # tidy the column names using GlobalArchive function 
-  dplyr::select(sample, latitude, longitude, date, site, location, successful.count) %>% # select only these columns to keep
+  clean_names() %>% # tidy the column names using CheckEM function 
+  dplyr::select(sample, latitude, longitude, date, site, location, successful_count) %>% # select only these columns to keep
   dplyr::mutate(sample = as.character(sample),
                 date = as.character(date),
                 campaignid = "2021-03_Geographe_BOSS",
@@ -24,8 +24,8 @@ geographe <- read.csv("data/raw/2021-03_Geographe_BOSS_Metadata.csv") %>%
   glimpse() # preview
 
 swc <- read.csv("data/raw/2021-03_West-Coast_BOSS_Metadata.csv") %>%
-  ga.clean.names() %>% # tidy the column names using GlobalArchive function 
-  dplyr::select(sample, latitude, longitude, date, site, location, successful.count) %>% 
+  clean_names() %>% # tidy the column names using GlobalArchive function 
+  dplyr::select(sample, latitude, longitude, date, site, location, successful_count) %>% 
   dplyr::mutate(sample = as.character(sample),
                 date = as.character(date),
                 campaignid = "2021-03_West-Coast_BOSS",
@@ -33,8 +33,8 @@ swc <- read.csv("data/raw/2021-03_West-Coast_BOSS_Metadata.csv") %>%
   glimpse() # preview
 
 abrolhos <- read.csv("data/raw/2021-05_Abrolhos_BOSS_Metadata.csv") %>%
-  ga.clean.names() %>% # tidy the column names using GlobalArchive function 
-  dplyr::select(sample, latitude, longitude, date, site, location, successful.count) %>% 
+  clean_names() %>% # tidy the column names using GlobalArchive function 
+  dplyr::select(sample, latitude, longitude, date, site, location, successful_count) %>% 
   dplyr::mutate(sample = as.character(sample),
                 date = as.character(date),
                 campaignid = "2021-05_Abrolhos_BOSS",
@@ -42,8 +42,8 @@ abrolhos <- read.csv("data/raw/2021-05_Abrolhos_BOSS_Metadata.csv") %>%
   glimpse() # preview
 
 daw <- read.csv("data/raw/2022-12_Daw_stereo-BOSS_Metadata.csv") %>%
-  ga.clean.names() %>%
-  dplyr::select(sample, latitude, longitude, date, site, location, successful.count) %>% 
+  clean_names() %>%
+  dplyr::select(sample, latitude, longitude, date, site, location, successful_count) %>% 
   dplyr::mutate(sample = as.character(sample),
                 date = as.character(date),
                 campaignid = "2022-12_Daw_stereo-BOSS",
@@ -54,8 +54,8 @@ daw <- read.csv("data/raw/2022-12_Daw_stereo-BOSS_Metadata.csv") %>%
   glimpse() # preview
 
 bremer <- read.csv("data/raw/2022-12_Bremer_stereo-BOSS_Metadata.csv") %>%
-  ga.clean.names() %>%
-  dplyr::select(sample, latitude, longitude, date, site, location, successful.count) %>% 
+  clean_names() %>%
+  dplyr::select(sample, latitude, longitude, date, site, location, successful_count) %>% 
   dplyr::mutate(sample = as.character(sample),
                 date = as.character(date),
                 campaignid = "2022-12_Bremer_stereo-BOSS",
@@ -64,8 +64,8 @@ bremer <- read.csv("data/raw/2022-12_Bremer_stereo-BOSS_Metadata.csv") %>%
   glimpse() # preview
 
 zeehan <- read.csv("data/raw/202205_ZEEHAN_AMP_BOSS_Metadata.csv") %>%
-  ga.clean.names() %>%
-  dplyr::select(period, latitude, longitude, date, site, location, successful.count) %>%
+  clean_names() %>%
+  dplyr::select(period, latitude, longitude, date, site, location, successful_count) %>%
   dplyr::rename(sample = period) %>%
   dplyr::mutate(sample = as.character(sample),
                 date = as.character(date),
@@ -74,8 +74,8 @@ zeehan <- read.csv("data/raw/202205_ZEEHAN_AMP_BOSS_Metadata.csv") %>%
   glimpse()
 
 franklin <- read.csv("data/raw/202204_FranklinAMP_BOSS_Metadata.csv") %>%
-  ga.clean.names() %>%
-  dplyr::select(period, latitude, longitude, date, site, location, successful.count) %>%
+  clean_names() %>%
+  dplyr::select(period, latitude, longitude, date, site, location, successful_count) %>%
   dplyr::rename(sample = period) %>%
   dplyr::mutate(sample = as.character(sample),
                 date = as.character(date),
@@ -94,52 +94,52 @@ names(metadata)
 # read in the points annotations ----
 abrolhos.points <- read.delim("data/raw/2021-05_Abrolhos_BOSS_Dot Point Measurements.txt",
                               header = T, skip = 4, stringsAsFactors = F) %>%
-  ga.clean.names() %>% # tidy the column names using GlobalArchive function
+  clean_names() %>% # tidy the column names using GlobalArchive function
   mutate(sample = str_replace_all(.$filename,c(".png"="",".jpg"="",".JPG"=""))) %>%
   mutate(sample = as.character(sample),
          campaignid = "2021-05_Abrolhos_BOSS") %>% 
-  select(sample, campaignid, image.row, image.col, broad, morphology, type) %>% # select only these columns to keep
-  dplyr::mutate(direction = ifelse(image.row < 1080 & image.col < 1920, "N", 
-                                   ifelse(image.row < 1080 & image.col >= 1920, "E", 
-                                          ifelse(image.row >= 1080 & image.col >= 1920, "S", "W")))) %>% 
+  select(sample, campaignid, image_row, image_col, broad, morphology, type) %>% # select only these columns to keep
+  dplyr::mutate(direction = ifelse(image_row < 1080 & image_col < 1920, "N", 
+                                   ifelse(image_row < 1080 & image_col >= 1920, "E", 
+                                          ifelse(image_row >= 1080 & image_col >= 1920, "S", "W")))) %>% 
   dplyr::select(sample, campaignid, direction, everything()) %>%
   glimpse() # preview
 
 swc.points <- read.delim("data/raw/2021-03_West-Coast_BOSS_Dot Point Measurements.txt",
                               header = T, skip = 4, stringsAsFactors = F) %>%
-  ga.clean.names() %>% # tidy the column names using GlobalArchive function
+  clean_names() %>% # tidy the column names using GlobalArchive function
   mutate(sample=str_replace_all(.$filename,c(".png"="",".jpg"="",".JPG"=""))) %>%
   mutate(sample=as.character(sample),
          campaignid = "2021-03_West-Coast_BOSS") %>% 
-  select(sample,campaignid,image.row,image.col,broad,morphology,type) %>% # select only these columns to keep
-  dplyr::mutate(direction = ifelse(image.row < 1080 & image.col < 1920, "N", 
-                                   ifelse(image.row < 1080 & image.col >= 1920, "E", 
-                                          ifelse(image.row >= 1080 & image.col >= 1920, "S", "W")))) %>% 
+  select(sample,campaignid,image_row,image_col,broad,morphology,type) %>% # select only these columns to keep
+  dplyr::mutate(direction = ifelse(image_row < 1080 & image_col < 1920, "N", 
+                                   ifelse(image_row < 1080 & image_col >= 1920, "E", 
+                                          ifelse(image_row >= 1080 & image_col >= 1920, "S", "W")))) %>% 
   dplyr::select(sample, campaignid, direction, everything()) %>%
   glimpse() # preview
 
 geo.points <- read.delim("data/raw/2021-03_Geographe_BOSS_Habitat_Dot Point Measurements.txt",
                          header = T, skip = 4, stringsAsFactors = F) %>%
-  ga.clean.names() %>% # tidy the column names using GlobalArchive function
+  clean_names() %>% # tidy the column names using GlobalArchive function
   mutate(sample = str_replace_all(.$filename,c(".png"="",".jpg"="",".JPG"=""))) %>%
   mutate(sample = as.character(sample),
          campaignid = "2021-03_Geographe_BOSS") %>% 
-  select(sample,campaignid,image.row,image.col,broad,morphology,type) %>% # select only these columns to keep
-  dplyr::mutate(direction = ifelse(image.row < 1080 & image.col < 1920, "N", 
-                                   ifelse(image.row < 1080 & image.col >= 1920, "E", 
-                                          ifelse(image.row >= 1080 & image.col >= 1920, "S", "W")))) %>% 
+  select(sample,campaignid,image_row,image_col,broad,morphology,type) %>% # select only these columns to keep
+  dplyr::mutate(direction = ifelse(image_row < 1080 & image_col < 1920, "N", 
+                                   ifelse(image_row < 1080 & image_col >= 1920, "E", 
+                                          ifelse(image_row >= 1080 & image_col >= 1920, "S", "W")))) %>% 
   dplyr::select(sample, campaignid, direction, everything()) %>%
   glimpse() # preview
 
 daw.points <- read.delim("data/raw/2022-12_Daw_stereo-BOSS_Dot Point Measurements.txt",
                          header = T, skip = 4, stringsAsFactors = F) %>%
-  ga.clean.names() %>% # tidy the column names using GlobalArchive function
+  clean_names() %>% # tidy the column names using GlobalArchive function
   mutate(sample = as.character(period),
          campaignid = "2022-12_Daw_stereo-BOSS") %>% 
-  select(sample,campaignid,image.row,image.col,broad,morphology,type) %>% # select only these columns to keep
-  dplyr::mutate(direction = ifelse(image.row < 1080 & image.col < 1920, "N", 
-                                   ifelse(image.row < 1080 & image.col >= 1920, "E", 
-                                          ifelse(image.row >= 1080 & image.col >= 1920, "S", "W")))) %>% 
+  select(sample,campaignid,image_row,image_col,broad,morphology,type) %>% # select only these columns to keep
+  dplyr::mutate(direction = ifelse(image_row < 1080 & image_col < 1920, "N", 
+                                   ifelse(image_row < 1080 & image_col >= 1920, "E", 
+                                          ifelse(image_row >= 1080 & image_col >= 1920, "S", "W")))) %>% 
   dplyr::select(sample, campaignid, direction, everything()) %>%
   separate(broad, into = c("broad", "broad.extra"), sep = " > ") %>%
   dplyr::mutate(broad = ifelse(broad %in% "Substrate" & broad.extra %in% "Unconsolidated (soft)", "Unconsolidated",
@@ -151,13 +151,13 @@ daw.points <- read.delim("data/raw/2022-12_Daw_stereo-BOSS_Dot Point Measurement
 
 bremer.points <- read.delim("data/raw/2022-12_Bremer_stereo-BOSS_Dot Point Measurements.txt",
                          header = T, skip = 4, stringsAsFactors = F) %>%
-  ga.clean.names() %>% # tidy the column names using GlobalArchive function
+  clean_names() %>% # tidy the column names using GlobalArchive function
   mutate(sample = as.character(period),
          campaignid = "2022-12_Bremer_stereo-BOSS") %>% 
-  select(sample,campaignid,image.row,image.col,broad,morphology,type) %>% # select only these columns to keep
-  dplyr::mutate(direction = ifelse(image.row < 1080 & image.col < 1920, "N", 
-                                   ifelse(image.row < 1080 & image.col >= 1920, "E", 
-                                          ifelse(image.row >= 1080 & image.col >= 1920, "S", "W")))) %>% 
+  select(sample,campaignid,image_row,image_col,broad,morphology,type) %>% # select only these columns to keep
+  dplyr::mutate(direction = ifelse(image_row < 1080 & image_col < 1920, "N", 
+                                   ifelse(image_row < 1080 & image_col >= 1920, "E", 
+                                          ifelse(image_row >= 1080 & image_col >= 1920, "S", "W")))) %>% 
   dplyr::select(sample, campaignid, direction, everything()) %>%
   separate(broad, into = c("broad", "broad.extra"), sep = " > ") %>%
   dplyr::mutate(broad = ifelse(broad %in% "Substrate" & broad.extra %in% "Unconsolidated (soft)", "Unconsolidated",
@@ -168,13 +168,13 @@ bremer.points <- read.delim("data/raw/2022-12_Bremer_stereo-BOSS_Dot Point Measu
   glimpse() # preview
 
 zeehan.points <- read.csv("data/raw/202205_ZEEHAN_AMP_BOSS_Habitat_Dot Point Measurements.csv") %>%
-  ga.clean.names() %>% # tidy the column names using GlobalArchive function
+  clean_names() %>% # tidy the column names using GlobalArchive function
   mutate(sample = str_replace_all(filename, ".jpg", ""),
          campaignid = "202205_ZEEHAN_AMP_BOSS") %>% 
-  select(sample,campaignid,image.row,image.col, c1, c2, c3) %>% # select only these columns to keep
-  dplyr::mutate(direction = ifelse(image.row < 1080 & image.col < 1920, "N", 
-                                   ifelse(image.row < 1080 & image.col >= 1920, "E", 
-                                          ifelse(image.row >= 1080 & image.col >= 1920, "S", "W")))) %>% 
+  select(sample,campaignid,image_row,image_col, c1, c2, c3) %>% # select only these columns to keep
+  dplyr::mutate(direction = ifelse(image_row < 1080 & image_col < 1920, "N", 
+                                   ifelse(image_row < 1080 & image_col >= 1920, "E", 
+                                          ifelse(image_row >= 1080 & image_col >= 1920, "S", "W")))) %>% 
   dplyr::select(sample, campaignid, direction, everything()) %>%
   dplyr::rename(broad = c1, morphology = c2, type = c3) %>%
   separate(broad, into = c("broad", "broad.extra"), sep = " > ") %>%
@@ -192,13 +192,13 @@ test <- zeehan.points %>%
   ungroup()
 
 franklin.points <- read.csv("data/raw/Franklin_202204_Habitat_Dot Point Measurements.csv") %>%
-  ga.clean.names() %>% # tidy the column names using GlobalArchive function
+  clean_names() %>% # tidy the column names using GlobalArchive function
   mutate(sample = str_replace_all(filename, ".jpg", ""),
          campaignid = "202204_FranklinAMP_BOSS") %>% 
-  select(sample,campaignid,image.row,image.col, c1, c2, c3) %>% # select only these columns to keep
-  dplyr::mutate(direction = ifelse(image.row < 1080 & image.col < 1920, "N", 
-                                   ifelse(image.row < 1080 & image.col >= 1920, "E", 
-                                          ifelse(image.row >= 1080 & image.col >= 1920, "S", "W")))) %>% 
+  select(sample,campaignid,image_row,image_col, c1, c2, c3) %>% # select only these columns to keep
+  dplyr::mutate(direction = ifelse(image_row < 1080 & image_col < 1920, "N", 
+                                   ifelse(image_row < 1080 & image_col >= 1920, "E", 
+                                          ifelse(image_row >= 1080 & image_col >= 1920, "S", "W")))) %>% 
   dplyr::select(sample, campaignid, direction, everything()) %>%
   dplyr::rename(broad = c1, morphology = c2, type = c3) %>%
   separate(broad, into = c("broad", "broad.extra"), sep = " > ") %>%
@@ -232,15 +232,15 @@ broad.points <- points %>%
   dplyr::group_by(sample) %>%
   distinct() %>%
   tidyr::spread(key = broad, value = count, fill = 0) %>%
-  dplyr::select(-c(image.row,image.col)) %>%
+  dplyr::select(-c(image_row,image_col)) %>%
   dplyr::group_by(sample, campaignid, direction) %>%
   dplyr::summarise_all(funs(sum)) %>%
   ungroup() %>%
+  clean_names() %>%
   dplyr::mutate(broad.total.points.annotated = rowSums(.[,4:(ncol(.))],na.rm = TRUE )) %>%
-  ga.clean.names() %>%
-  dplyr::mutate(broad.black.octocorals = broad.black.octocorals + broad.octocoral.black,
-                broad.invertebrate.complex = broad.invertebrate.complex + broad.matrix) %>%
-  dplyr::select(-c(broad.octocoral.black, broad.matrix)) %>%
+  dplyr::mutate(broad_black_octocorals = broad_black_octocorals + broad_octocoral_black,
+                broad_invertebrate_complex = broad_invertebrate_complex + broad_matrix) %>%
+  dplyr::select(-c(broad_octocoral_black, broad_matrix)) %>%
   glimpse
 
 detailed.points <- points %>%
@@ -250,12 +250,11 @@ detailed.points <- points %>%
   dplyr::group_by(sample) %>%
   distinct() %>%
   tidyr::spread(key = detailed, value = count, fill = 0) %>%
-  dplyr::select(-c(image.row,image.col, broad, morphology, type)) %>%
+  dplyr::select(-c(image_row,image_col, broad, morphology, type)) %>%
   dplyr::group_by(sample, campaignid, direction) %>%
   dplyr::summarise_all(funs(sum)) %>%
   ungroup() %>%
   dplyr::mutate(broad.total.points.annotated = rowSums(.[,4:(ncol(.))],na.rm = TRUE )) %>%
-  # ga.clean.names() %>%
   glimpse
 
 # Write final habitat data----
@@ -266,10 +265,6 @@ habitat.broad.points <- broad.points %>%
 habitat.detailed.points <- detailed.points %>%
   left_join(metadata, by = c("sample", "campaignid")) %>%
   glimpse()
-
-test <- habitat.broad.points %>%
-  dplyr::group_by(campaignid, sample) %>%
-  dplyr::summarise(n = n()) # Loads of tassie ones missing directions
 
 write.csv(habitat.broad.points,file = paste("data/tidy", paste(study,"broad.habitat.csv",sep = "_"), sep = "/"), row.names=FALSE)
 write.csv(habitat.detailed.points,file = paste("data/tidy", paste(study,"detailed.habitat.csv",sep = "_"), sep = "/"), row.names=FALSE)

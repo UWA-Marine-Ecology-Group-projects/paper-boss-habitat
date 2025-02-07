@@ -86,11 +86,14 @@ met <- read.csv(paste("data/tidy", paste(study,"detailed.habitat.csv",
 wgscrs <- "+proj=longlat +datum=WGS84"
 gdacrs <- "+proj=longlat +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +no_defs"
 
+sf_use_s2(F)
+
 dat.sf <- met %>%
   st_as_sf(coords = c("longitude", "latitude"), crs = wgscrs) %>%
   group_by(location) %>%
   dplyr::summarise() %>%
   st_cast("POLYGON") %>%
+  st_make_valid() %>%
   st_convex_hull() %>%
   st_buffer(dist = 0.2)
 
@@ -99,7 +102,6 @@ plot(dat.sf)
 e <- ext(112, 147, -42, -26)
 
 # Load necessary spatial files
-sf_use_s2(F)                                                                    # Switch off spatial geometry for cropping
 # Australian outline and state and commonwealth marine parks
 aus    <- st_read("data/spatial/shapefiles/cstauscd_r.mif") %>%                 # Geodata 100k coastline available: https://data.gov.au/dataset/ds-ga-a05f7892-eae3-7506-e044-00144fdd4fa6/
   dplyr::filter(FEAT_CODE %in% c("mainland", "island"))
@@ -143,12 +145,17 @@ cwatr <- st_read("data/spatial/shapefiles/amb_coastal_waters_limit.shp")       #
 cwatr <- st_crop(cwatr, e)
 
 # Bathymetry data
-bathy <- rast("data/spatial/rasters/bath_250_good.tif") %>%
+download.file(url = "https://files.ausseabed.gov.au/survey/Australian%20Bathymetry%20and%20Topography%202023%20250m.zip",
+              destfile = "data/spatial/rasters/250m_res_bathymetry.zip")
+unzip(zipfile = "data/spatial/rasters/250m_res_bathymetry.zip", exdir = "data/spatial/rasters/")
+
+bathy <- rast("data/spatial/rasters/Australian_Bathymetry_and_Topography_2023_250m_MSL_cog.tif") %>%
+  clamp(upper = 0, values = F) %>%
   crop(ext(111, 148, -43, -25)) %>%
   as.data.frame(xy = TRUE)
 
 p4 <- ggplot() +
-  geom_raster(data = bathy, aes(x = x, y = y, fill = bath_250_good),
+  geom_raster(data = bathy, aes(x = x, y = y, fill = Australian_Bathymetry_and_Topography_2023_250m_MSL_cog),
               show.legend = F, alpha = 0.7) +
   scale_fill_gradientn(colours = c("#062f6b", "#2b63b5","#9dc9e1"),
                        values = rescale(c(-6221, -120, 0))) +
